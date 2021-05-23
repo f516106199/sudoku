@@ -3,9 +3,14 @@
     namespace sudoku{
         namespace grid{
 
-void grid::setVal(int val,State state){
+void grid::setVal(int val,Status status){
     this->val=val;
-    this->state=state;
+    this->status=status;
+}
+
+grid::grid& grid::operator=(const grid& g){
+    val=g.val;
+    status=g.status;
 }
         }//namespace grid
     }//namepsace soduku

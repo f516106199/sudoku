@@ -8,7 +8,7 @@
         namespace grid{
 
 class grid{
-    friend class game;
+    friend class game::game;
 public:
     enum class Status{
         INITED,
@@ -16,8 +16,9 @@ public:
         SET
     };
     grid(Status status):status(status){}
+    grid(){}
     void setVal(int val,Status status);
-private:
+    grid & operator = (const grid&);
     int val;
     Status status;
 };
