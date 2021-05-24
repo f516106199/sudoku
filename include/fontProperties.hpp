@@ -42,10 +42,11 @@ private:
 public:
     colorFormat(fontColor m):fC(m){}
     fontColor retColor();
-    std::ostream& 
-    operator <<(std::ostream& os){
-        return os<<"\033["<<fC<<"m";
-    }
+    friend std::ostream& 
+    operator <<(std::ostream& os,colorFormat fc){
+        return os<<"\033["<<fc<<"m";
+    };
+
 };
 
         }//namespace fontProperties

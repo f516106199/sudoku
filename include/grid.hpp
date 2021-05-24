@@ -13,7 +13,9 @@ public:
     enum class Status{
         INITED,
         UNCERTAIN,
-        SET
+        SET,
+        ERR,
+        FakeErr
     };
     grid(Status status):status(status){}
     grid(){}
