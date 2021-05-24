@@ -45,7 +45,7 @@ class Bcommand:public command{
     friend class game::game;
 public:
     Bcommand(int preval,grid::grid::Status pres,int curval,grid::grid::Status curs,int r ,int c )
-    :command(Kind::OK,preval,pres,curval,curs,r,c){}
+    :command(Kind::BAD,preval,pres,curval,curs,r,c){}
     void SetOther(grid::grid::Status pres,grid::grid::Status curs,int r ,int c );
 private:
     grid::grid::Status OpreS;

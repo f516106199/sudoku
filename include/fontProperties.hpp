@@ -44,7 +44,7 @@ public:
     fontColor retColor();
     friend std::ostream& 
     operator <<(std::ostream& os,colorFormat fc){
-        return os<<"\033["<<fc<<"m";
+        return os<<"\033["<<fc.fC<<"m";
     };
 
 };

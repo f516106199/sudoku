@@ -110,7 +110,7 @@ void game::setCheckChange(const errinfo& res){
             table[m*9+n].status=grid::grid::Status::FakeErr;
 }
 
-game::errinfo game::check(){
+game::errinfo game::check(){ // first check col then row then 9 
     int i=curpos.first;
     int j=curpos.second;
     int val=table[i*9+j].val;
@@ -126,8 +126,8 @@ game::errinfo game::check(){
     }
     i/=3;
     j/=3;
-    for(int m=i;m!=i+3;++m){
-        for(int n=j;n!=j+3;++j){
+    for(int m=i*3;m!=i*3+3;++m){
+        for(int n=j*3;n!=j*3+3;++n){
             if(table[m*9+n].val==val&&(m!=curpos.first||n!=curpos.second)){
                 status=Status::ERROR;
                 return errinfo(1,i,j,m,n);
@@ -155,41 +155,41 @@ void game::fillVertex(){
     for(int i=0;i!=3;++i){
         for(int j=0;j!=3;++j){
             if(i==0)
-                table[i*9+j]=table[4*9+j+3];
+                table[i*9+j]=table[1*9+j+3];
             else if(i==1)
-                table[i*9+j]=table[5*9+j+3];
+                table[i*9+j]=table[2*9+j+3];
             else if(i==2)
-                table[i*9+j]=table[3*9+j+3];
+                table[i*9+j]=table[j+3];
         }
     }
     for(int i=0;i!=3;++i){
         for(int j=6;j!=9;++j){
             if(i==0)
-                table[i*9+j]=table[5*9+j-3];
+                table[i*9+j]=table[2*9+j-3];
             else if(i==1)
-                table[i*9+j]=table[3*9+j-3];
+                table[i*9+j]=table[j-3];
             else if(i==2)
-                table[i*9+j]=table[4*9+j-3];
+                table[i*9+j]=table[1*9+j-3];
         }
     }
     for(int i=6;i!=9;++i){
         for(int j=0;j!=3;++j){
             if(i==6)
-                table[i*9+j]=table[4*9+j+3];
+                table[i*9+j]=table[7*9+j+3];
             else if(i==7)
-                table[i*9+j]=table[5*9+j+3];
+                table[i*9+j]=table[8*9+j+3];
             else if(i==8)
-                table[i*9+j]=table[3*9+j+3];
+                table[i*9+j]=table[6*9+j+3];
         }
     }
     for(int i=6;i!=9;++i){
         for(int j=6;j!=9;++j){
             if(i==6)
-                table[i*9+j]=table[5*9+j-3];
+                table[i*9+j]=table[8*9+j-3];
             else if(i==7)
-                table[i*9+j]=table[3*9+j-3];
+                table[i*9+j]=table[6*9+j-3];
             else if(i==8)
-                table[i*9+j]=table[4*9+j-3];
+                table[i*9+j]=table[7*9+j-3];
         }
     }
 }
@@ -207,7 +207,7 @@ void game::fillBorder(){
     for(int i=6;i!=9;++i){
         for(int j=3;j!=6;++j){
             if(j==3)
-                table[i*9+j]=table[(i-3*9+5)];
+                table[i*9+j]=table[(i-3)*9+5];
             else if(j==4)
                 table[i*9+j]=table[(i-3)*9+3];
             else if(j==5)
@@ -274,7 +274,7 @@ void game::undo(){
     }
     else{
         command::Bcommand*p2=reinterpret_cast<command::Bcommand*>(p);
-        int index=p2->Opos.first*9+p2->Opos.second;
+        int index=p2->pos.first*9+p2->pos.second;
         table[index].setVal(p2->preVal,p2->preS);
         index=p2->Opos.first*9+p2->Opos.second;
         table[index].status=p2->OpreS;
