@@ -9,6 +9,7 @@ void printhelp(){
     std::cout << "Usage:" << std::endl;
     std::cout << "\t sudoku [-l <progressFile>]" << std::endl << std::endl;
     std::cout << "Options:" << std::endl;
+    std::cout<<"\t -h \t to get help information that is showned now."<<std::endl;
     std::cout << "\t -l <path> \t specify path of progress file to load, optional." << std::endl
               << std::endl;
 }
@@ -51,6 +52,14 @@ int main(int argc,char**argv){
             exit(-1);
         }
         Game=new sudoku::game::game(argv[2]);
+    }
+    else if(argc==2&&strcmp(argv[1],"-h")==0){
+        printhelp();
+        exit(0);
+    }
+    else {
+        printhelp();
+        exit(-1);
     }
     Game->init();
     auto play=new sudoku::scene::scene(*Game);
