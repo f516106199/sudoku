@@ -1,6 +1,7 @@
 #include"../include/scene.hpp"
 #include"../include/game.hpp"
 #include<iostream>
+#include<cstring>
 void printhelp(){
     std::cout << std::endl;
     std::cout << "sudoku - a little game in command line" << std::endl
@@ -18,7 +19,7 @@ int chooseLevel(){
     int opt;
     std::cin>>opt;
     while(!(opt>0&&opt<5)){
-        system("cls");
+        int t=system("cls");
         std::cout<<"choose level\t 1.bronze  2.gold  3.diamond  4.master"<<std::endl;
         std::cin>>opt;
     }
@@ -45,6 +46,10 @@ int main(int argc,char**argv){
         Game=new sudoku::game::game(L);
     }
     else if(argc==3){
+        if(strcmp(argv[1],"-l")!=0){
+            printhelp();
+            exit(-1);
+        }
         Game=new sudoku::game::game(argv[2]);
     }
     Game->init();

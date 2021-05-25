@@ -63,6 +63,7 @@ bool game::loadFile(){
     }
     std:: string strtmp;
     isf>>strtmp;
+    isf>>eraseNum;
     if(strtmp=="bronze"){
         level=Level::bronze;
     }
@@ -70,10 +71,10 @@ bool game::loadFile(){
         level=Level::diamond;
     }   
     else if(strtmp=="master"){
-        level==Level::master;
+        level=Level::master;
     }
     else if(strtmp=="gold"){
-        level==Level::gold;
+        level=Level::gold;
     }
     std::string strt;
     for(int i=0;i!=81;++i){
@@ -92,51 +93,87 @@ bool game::loadFile(){
             table[i].status=grid::grid::Status::SET;
         }
         else if(strt=="UNCERTAIN"){
-            table[i].status==grid::grid::Status::UNCERTAIN;
+            table[i].status=grid::grid::Status::UNCERTAIN;
         }
     }
     isf.close();
     return 1;
 }
-void game::setCheckChange(const errinfo& res){
-    int i=res.p1.first;
-    int j=res.p1.second;
-    int m=res.p2.first;
-    int n=res.p2.second;
-    table[i*9+j].status=grid::grid::Status::ERR;
-        if(table[m*9+n].status!=grid::grid::Status::INITED&&table[m*9+n].status!=grid::grid::Status::FakeErr)
-            table[m*9+n].status=grid::grid::Status::ERR;
-        else
-            table[m*9+n].status=grid::grid::Status::FakeErr;
+void game::setCheckChange(){
+   if(table[curpos.first*9+curpos.second].val==0){
+       table[curpos.first*9+curpos.second].status=grid::grid::Status::UNCERTAIN;
+       if(setVec.find(std::make_pair(curpos.first,curpos.second))!=setVec.end()){
+           setVec.erase(std::make_pair(curpos.first,curpos.second));
+       }
+   }
+   else{
+       table[curpos.first*9+curpos.second].status=grid::grid::Status::SET;
+       if(setVec.find(std::make_pair(curpos.first,curpos.second))==setVec.end()){
+           setVec.insert(std::make_pair(curpos.first,curpos.second));
+       }
+   }
+   for(auto &m:table){
+       if(m.status==grid::grid::Status::ERR){
+           m.status=grid::grid::Status::SET;
+       }
+       if(m.status==grid::grid::Status::FakeErr){
+           m.status=grid::grid::Status::INITED;
+       }
+   }
+   for(auto pairPos:setVec){
+       setCheckChange(pairPos);
+   }
 }
 
-game::errinfo game::check(){ // first check col then row then 9 
-    int i=curpos.first;
-    int j=curpos.second;
+void game::setCheckChange(std::pair<int,int>pos){
+    int i=pos.first;
+    int j=pos.second;
     int val=table[i*9+j].val;
     for(int k=0;k!=9;++k){
         if(table[i*9+k].val==val&&k!=j){
             status=Status::ERROR;
-            return errinfo(1,i,j,i,k);
+            table[i*9+j].status=grid::grid::Status::ERR;
+            if(table[i*9+k].status!=grid::grid::Status::ERR&&table[i*9+k].status!=grid::grid::Status::FakeErr){
+                if(table[i*9+k].status==grid::grid::Status::INITED){
+                    table[i*9+k].status=grid::grid::Status::FakeErr;
+                }
+                else {
+                    table[i*9+k].status=grid::grid::Status::ERR;
+                }
+            }
         }
-        if(table[k*9+j].val==val&&k!=i){
+        if(table[k*9+j].val==val&&i!=k){
             status=Status::ERROR;
-            return errinfo(1,i,j,k,j);
-        }   
+            table[i*9+j].status=grid::grid::Status::ERR;
+            if(table[k*9+j].status!=grid::grid::Status::ERR&&table[k*9+j].status!=grid::grid::Status::FakeErr){
+                if(table[k*9+j].status==grid::grid::Status::INITED){
+                    table[k*9+j].status=grid::grid::Status::FakeErr;
+                }
+                else {
+                    table[k*9+j].status==grid::grid::Status::ERR;
+                }
+            }
+        }
     }
     i/=3;
     j/=3;
     for(int m=i*3;m!=i*3+3;++m){
         for(int n=j*3;n!=j*3+3;++n){
-            if(table[m*9+n].val==val&&(m!=curpos.first||n!=curpos.second)){
+            if(table[m*9+n].val==val&&(m!=pos.first||n!=pos.second)){
                 status=Status::ERROR;
-                return errinfo(1,i,j,m,n);
+                table[pos.first*9+pos.second].status=grid::grid::Status::ERR;
+                if(table[m*9+n].status!=grid::grid::Status::ERR&&table[m*9+n].status!=grid::grid::Status::FakeErr){
+                if(table[m*9+n].status==grid::grid::Status::INITED){
+                    table[m*9+n].status=grid::grid::Status::FakeErr;
+                }
+                else {
+                    table[m*9+n].status==grid::grid::Status::ERR;
+                }
+            }
             }
         }
     }
-    return errinfo(0,0,0,0,0);
 }
-
 void game::fillCenter(){
     bool used[9]={0};
     srand((int)time(0));
@@ -266,19 +303,21 @@ bool game::init(){
 void game::undo(){
     auto p=cmdVec.back();
     cmdVec.pop_back();
-    if(p->kind==command::command::Kind::OK){
-        command::Ocommand* p1=reinterpret_cast<command::Ocommand*>(p);
-        int index=p1->pos.first*9+p1->pos.second;
-        table[index].val=p1->preVal;
-        table[index].status=p1->preS;
+    int index=p->pos.first*9+p->pos.second;
+    table[index].val=p->preVal;
+    curpos.first=p->pos.first;
+    curpos.second=p->pos.second;
+    setCheckChange();
+}
+
+bool game::checkFinish(){
+    for(auto m:table){
+        if(m.status!=grid::grid::Status::INITED&&m.status!=grid::grid::Status::SET){
+            return 0;
+        }
     }
-    else{
-        command::Bcommand*p2=reinterpret_cast<command::Bcommand*>(p);
-        int index=p2->pos.first*9+p2->pos.second;
-        table[index].setVal(p2->preVal,p2->preS);
-        index=p2->Opos.first*9+p2->Opos.second;
-        table[index].status=p2->OpreS;
-    }
+    return 1;
 }
         }//namespace game;
     }//namespace sudoku 
+

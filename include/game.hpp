@@ -6,6 +6,7 @@
 #include<string>
 #include"../include/grid.hpp"
 #include"../include/command.hpp"
+#include<set>
     namespace sudoku{
         namespace scene{
             class scene;
@@ -25,8 +26,6 @@ public:
         diamond,
         master
     };
-    void generate();// genertate game 
-   // void run();
     bool init();
     game():eraseNum(0),status(Status::CONTINUE),saveDir(){}
     game(Level level):status(Status::CONTINUE),level(level),saveDir(){
@@ -42,6 +41,7 @@ public:
     }
     game(const std::string str):saveDir(str){}
 private:
+    std::set<std::pair<int,int>>setVec;
     std::pair<int,int>curpos;
     std::array<grid::grid,81>table;
     int eraseNum;
@@ -49,21 +49,17 @@ private:
     Level level;
     std::string saveDir;
     std::vector<command::command*>cmdVec;
-    bool saveFile();
-    struct errinfo{
-        bool err;
-        std::pair<int,int>p1;
-        std::pair<int,int>p2;
-        errinfo(bool err,int a,int b,int c,int d):err(err),p1(std::make_pair(a,b)),p2(std::make_pair(c,d)){}
-    };
-    errinfo check();
     void fillCenter();
     void fillVertex();
     void fillBorder();
     bool loadFile();
+    bool saveFile();
     void eraseGrid();
-    void setCheckChange(const errinfo& res);
+    void generate();
+    void setCheckChange();
+    void setCheckChange(std::pair<int,int>);
     void undo();
+    bool checkFinish();
 };
 
 
